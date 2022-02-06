@@ -51,13 +51,13 @@ static void timer_int_task(void* arg)
     {
       if(xQueueReceive(s_timer_queue, &evt, portMAX_DELAY))
       {
-          ESP_LOGE(alarm_tag,"Timer finished.");
+          ESP_LOGI(alarm_tag,"Timer finished.");
           if(psh_btn_state == alarm_arm_state &&
              mgn_reed_state == 0)
           {
             bzr_state   = 1;
             gpio_set_level(BZR_PIN,bzr_state);
-            ESP_LOGE(alarm_tag,"Buzzer activated.");
+            ESP_LOGI(alarm_tag,"Buzzer activated.");
           }
           // stop the timer
           timer_pause(TIMER_GROUP_0, TIMER_0);
@@ -79,17 +79,17 @@ static void gpio_int_task(void* arg)
           // Check for double events
           if(psh_btn_state != psh_btn_last_state)
           {
-            ESP_LOGE(alarm_tag,"GPIO[%d] intr, val: %d\n", io_num, psh_btn_state);
+            ESP_LOGI(alarm_tag,"GPIO[%d] intr, val: %d\n", io_num, psh_btn_state);
             if (psh_btn_state == alarm_disarm_state)
             {
               // If the buzzer has been activated and disarm request was issued
               if(bzr_state == 1)
               {
                 // stop the timer
-                ESP_LOGE(alarm_tag,"Timer stopped.");
+                ESP_LOGI(alarm_tag,"Timer stopped.");
                 bzr_state   = 0;
                 gpio_set_level(BZR_PIN,bzr_state);
-                ESP_LOGE(alarm_tag,"Buzzer deactivated.");
+                ESP_LOGI(alarm_tag,"Buzzer deactivated.");
                 timer_pause(TIMER_GROUP_0, TIMER_0);
               }
               else
@@ -116,14 +116,14 @@ static void gpio_int_task(void* arg)
               timer_interval = DISARM_INTERVAL;
               xTaskCreate(timer_int_task, "timer_int_task", 2048, NULL, 10, NULL);
 
-              ESP_LOGE(alarm_tag,
+              ESP_LOGI(alarm_tag,
                        "Door state = %d on alarm arm state %d.\n",
                        gpio_get_level(MG_SNS_PIN),
                        alarm_arm_state);
             }
             else
             {
-              ESP_LOGE(alarm_tag,
+              ESP_LOGI(alarm_tag,
                        "Door state = %d on alarm disarm state %d.\n",
                        gpio_get_level(MG_SNS_PIN),
                        alarm_disarm_state);
@@ -151,19 +151,20 @@ uint8_t get_alarm_current_state()
 
 void activate_buzzer(uint8_t door_state)
 {
+  ESP_LOGI(alarm_tag,"Activating Buzzer.");
   if(psh_btn_state == alarm_arm_state && door_state == MGNTC_REED_BREACH_ST)
   {
     bzr_state   = 1;
     gpio_set_level(BZR_PIN,bzr_state);
-    ESP_LOGE(alarm_tag,"Buzzer activated.");
+    ESP_LOGI(alarm_tag,"Buzzer activated.");
   }
   else if(door_state == MGNTC_REED_CLOSED_ST)
   {
-    ESP_LOGE(alarm_tag,"Door closed.");
+    ESP_LOGI(alarm_tag,"Door closed.");
   }
   else
   {
-    ESP_LOGE(alarm_tag,"Alarm is disarmed.");
+    ESP_LOGI(alarm_tag,"Alarm is disarmed.");
   }
 }
 
@@ -192,8 +193,8 @@ static void init(void)
     alarm_arm_state = 1;
   }
 
-  ESP_LOGE(alarm_tag,"ARM state = %d\n", alarm_arm_state);
-  ESP_LOGE(alarm_tag,"DISARM state = %d\n",alarm_disarm_state);
+  ESP_LOGI(alarm_tag,"ARM state = %d\n", alarm_arm_state);
+  ESP_LOGI(alarm_tag,"DISARM state = %d\n",alarm_disarm_state);
 
   // Initialize client and start searching for devices of interest
   ble_client_init();

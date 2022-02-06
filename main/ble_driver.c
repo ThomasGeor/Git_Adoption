@@ -255,7 +255,7 @@ static void gatts_profile_a_event_handler(esp_gatts_cb_event_t event, esp_gatt_i
     }
     case ESP_GATTS_WRITE_EVT: {
         ESP_LOGI(GATTS_TAG, "GATT_WRITE_EVT, conn_id %d, trans_id %d, handle %d", param->write.conn_id, param->write.trans_id, param->write.handle);
-        if (!param->write.is_prep){
+        // if (!param->write.is_prep){
             ESP_LOGI(GATTS_TAG, "GATT_WRITE_EVT, value len %d, value :", param->write.len);
             esp_log_buffer_hex(GATTS_TAG, param->write.value, param->write.len);
             // external event reported
@@ -299,7 +299,7 @@ static void gatts_profile_a_event_handler(esp_gatts_cb_event_t event, esp_gatt_i
                 }
 
             }
-        }
+        // }
         example_write_event_env(gatts_if, &a_prepare_write_env, param);
         break;
     }
@@ -437,6 +437,9 @@ static void gatts_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_
 
 void ble_client_init()
 {
+  // Disable the logs to let the ble go faster
+  esp_log_level_set(GATTC_TAG,ESP_LOG_ERROR);
+
   esp_err_t ret;
 
   // Initialize NVS.
